@@ -6,6 +6,15 @@ import _ from 'lodash'
 import map from './assets/map.png'
 import './App.css'
 
+function getRandomColor() {
+  var letters = '0123456789ABCDEF'
+  var color = '#'
+  for (var i = 0; i < 6; i++) {
+    color += letters[Math.floor(Math.random() * 16)]
+  }
+  return color
+}
+
 class Graph {
   @observable currentNodeKey = ''
 
@@ -24,7 +33,12 @@ class Graph {
         top: 511,
         left: 75
       },
-      relations: ['E2', 'E3', 'J', 'I']
+      relations: [
+        { name: 'E2', cost: 2 },
+        { name: 'E3', cost: 4 },
+        { name: 'J', cost: 1 },
+        { name: 'I', cost: 3 }
+      ]
     },
     E2: {
       isEntrance: true,
@@ -32,7 +46,13 @@ class Graph {
         top: 490,
         left: 207
       },
-      relations: ['E1', 'E3', 'J', 'F', 'R']
+      relations: [
+        { name: 'E1', cost: 2 },
+        { name: 'E3', cost: 5 },
+        { name: 'J', cost: 1 },
+        { name: 'F', cost: 3 },
+        { name: 'R', cost: 4 }
+      ]
     },
     E3: {
       isEntrance: true,
@@ -40,7 +60,13 @@ class Graph {
         left: 672,
         top: 492
       },
-      relations: ['E1', 'E2', 'A', 'P', 'R']
+      relations: [
+        { name: 'E1', cost: 5 },
+        { name: 'E2', cost: 4 },
+        { name: 'A', cost: 1 },
+        { name: 'P', cost: 3 },
+        { name: 'R', cost: 2 }
+      ]
     },
     A: {
       measure: {
@@ -49,7 +75,12 @@ class Graph {
         left: 563,
         top: 336
       },
-      relations: ['E3', 'B', 'D', 'P']
+      relations: [
+        { name: 'E3', cost: 2 },
+        { name: 'B', cost: 1 },
+        { name: 'D', cost: 3 },
+        { name: 'P', cost: 4 }
+      ]
     },
     B: {
       measure: {
@@ -58,7 +89,13 @@ class Graph {
         width: 64,
         height: 208
       },
-      relations: ['A', 'C', 'D', 'F', 'R']
+      relations: [
+        { name: 'A', cost: 2 },
+        { name: 'C', cost: 1 },
+        { name: 'D', cost: 4 },
+        { name: 'F', cost: 5 },
+        { name: 'R', cost: 3 }
+      ]
     },
     C: {
       measure: {
@@ -69,7 +106,11 @@ class Graph {
         height: 65,
         width: 68
       },
-      relations: ['B', 'F', 'R']
+      relations: [
+        { name: 'B', cost: 1 },
+        { name: 'F', cost: 2 },
+        { name: 'R', cost: 3 }
+      ]
     },
     D: {
       measure: {
@@ -78,7 +119,16 @@ class Graph {
         width: 242,
         height: 62
       },
-      relations: ['A', 'B', 'E', 'F', 'K', 'L', 'O', 'P']
+      relations: [
+        { name: 'A', cost: 1 },
+        { name: 'B', cost: 3 },
+        { name: 'E', cost: 2 },
+        { name: 'F', cost: 6 },
+        { name: 'K', cost: 4 },
+        { name: 'L', cost: 8 },
+        { name: 'O', cost: 5 },
+        { name: 'P', cost: 7 }
+      ]
     },
     E: {
       measure: {
@@ -87,7 +137,15 @@ class Graph {
         left: 168,
         top: 83
       },
-      relations: ['D', 'F', 'G', 'H', 'I', 'K', 'L']
+      relations: [
+        { name: 'D', cost: 3 },
+        { name: 'F', cost: 5 },
+        { name: 'G', cost: 7 },
+        { name: 'H', cost: 1 },
+        { name: 'I', cost: 4 },
+        { name: 'K', cost: 6 },
+        { name: 'L', cost: 2 }
+      ]
     },
     F: {
       measure: {
@@ -96,7 +154,14 @@ class Graph {
         width: 46,
         height: 209
       },
-      relations: ['B', 'C', 'D', 'E', 'G', 'J']
+      relations: [
+        { name: 'B', cost: 3 },
+        { name: 'C', cost: 4 },
+        { name: 'D', cost: 5 },
+        { name: 'E', cost: 2 },
+        { name: 'G', cost: 1 },
+        { name: 'J', cost: 6 }
+      ]
     },
     G: {
       measure: {
@@ -105,7 +170,12 @@ class Graph {
         width: 27,
         height: 90
       },
-      relations: ['E', 'F', 'H', 'J']
+      relations: [
+        { name: 'E', cost: 1 },
+        { name: 'F', cost: 4 },
+        { name: 'H', cost: 3 },
+        { name: 'J', cost: 2 }
+      ]
     },
     H: {
       measure: {
@@ -114,7 +184,12 @@ class Graph {
         width: 20,
         height: 59
       },
-      relations: ['E', 'G', 'I', 'J']
+      relations: [
+        { name: 'E', cost: 1 },
+        { name: 'G', cost: 4 },
+        { name: 'I', cost: 2 },
+        { name: 'J', cost: 3 }
+      ]
     },
     I: {
       measure: {
@@ -124,7 +199,11 @@ class Graph {
         transform: 'rotate(15deg)',
         height: 23
       },
-      relations: ['E1', 'E', 'H']
+      relations: [
+        { name: 'E1', cost: 3 },
+        { name: 'E', cost: 5 },
+        { name: 'H', cost: 6 }
+      ]
     },
     J: {
       measure: {
@@ -133,7 +212,13 @@ class Graph {
         width: 70,
         height: 143
       },
-      relations: ['E1', 'E2', 'F', 'G', 'H']
+      relations: [
+        { name: 'E1', cost: 2 },
+        { name: 'E2', cost: 1 },
+        { name: 'F', cost: 10 },
+        { name: 'G', cost: 4 },
+        { name: 'H', cost: 7 }
+      ]
     },
     K: {
       measure: {
@@ -142,7 +227,12 @@ class Graph {
         width: 14,
         height: 18
       },
-      relations: ['D', 'E', 'F', 'L']
+      relations: [
+        { name: 'D', cost: 5 },
+        { name: 'E', cost: 10 },
+        { name: 'F', cost: 1 },
+        { name: 'L', cost: 6 }
+      ]
     },
     L: {
       measure: {
@@ -151,7 +241,12 @@ class Graph {
         width: 116,
         height: 67
       },
-      relations: ['D', 'E', 'K', 'O']
+      relations: [
+        { name: 'D', cost: 1 },
+        { name: 'E', cost: 5 },
+        { name: 'K', cost: 10 },
+        { name: 'O', cost: 2 }
+      ]
     },
     O: {
       measure: {
@@ -160,7 +255,11 @@ class Graph {
         width: 59,
         height: 22
       },
-      relations: ['D', 'L', 'P']
+      relations: [
+        { name: 'D', cost: 10 },
+        { name: 'L', cost: 3 },
+        { name: 'P', cost: 2 }
+      ]
     },
     P: {
       measure: {
@@ -169,7 +268,12 @@ class Graph {
         width: 31,
         height: 22
       },
-      relations: ['E3', 'A', 'D', 'O']
+      relations: [
+        { name: 'E3', cost: 2 },
+        { name: 'A', cost: 7 },
+        { name: 'D', cost: 9 },
+        { name: 'O', cost: 1 }
+      ]
     },
     R: {
       measure: {
@@ -178,7 +282,13 @@ class Graph {
         width: 27,
         height: 35
       },
-      relations: ['E2', 'E3', 'A', 'B', 'C']
+      relations: [
+        { name: 'E2', cost: 1 },
+        { name: 'E3', cost: 10 },
+        { name: 'A', cost: 3 },
+        { name: 'B', cost: 7 },
+        { name: 'C', cost: 5 }
+      ]
     }
   }
 
@@ -201,7 +311,7 @@ class Graph {
     this.currentNodeKey = key
     this.clearSearch()
     const updated = _.mapValues(this.nodes, (node, key) => {
-      const found = this.currentNode.relations.filter(
+      const found = _.map(this.currentNode.relations, (r, k) => r.name).filter(
         relation => relation == key
       ).length
       if (!!found) {
@@ -241,6 +351,7 @@ class Graph {
 
   @action
   initDFS = (start, finish) => {
+    this.initSearch()
     this.stack.push(start)
     const popped = this.stack.pop()
     this.DFS(popped, finish)
@@ -248,6 +359,12 @@ class Graph {
 
   @action
   DFS = (node, finish) => {
+    console.log('DFS', {
+      name: node,
+      found: this.found,
+      node: this.nodes[node]
+      // visited: this.nodes[node].visited
+    })
     if (this.found) return
     if (this.nodes[node] == null) return
     if (!!this.nodes[node].visited) return
@@ -258,7 +375,10 @@ class Graph {
     }
 
     const relations = _.difference(
-      _.difference(this.nodes[node].relations, this.stack),
+      _.difference(
+        _.map(this.nodes[node].relations, (r, k) => r.name),
+        this.stack
+      ),
       this.visited
     )
     this.stack = [...this.stack, ...relations]
@@ -268,6 +388,7 @@ class Graph {
 
   @action
   initBFS = (start, finish) => {
+    this.initSearch()
     this.stack.push(start)
     const shifted = this.stack.shift()
     this.BFS(shifted, finish)
@@ -281,26 +402,30 @@ class Graph {
     this.setVisited(node)
     if (node == finish) {
       this.found = true
-      return alert(`found ${node}`)
+      return alert(`Encontrado ${node}`)
     }
     const relations = _.difference(
-      _.difference(this.nodes[node].relations, this.stack),
+      _.difference(_.map(this.nodes[node].relations, r => r.name), this.stack),
       this.visited
     )
     this.stack = [...this.stack, ...relations]
     const shifted = this.stack.shift()
-    this.DFS(shifted, finish)
+    this.BFS(shifted, finish)
   }
 
   @action
   initIDS = (start, finish) => {
+    this.initSearch()
     this.stack.push(start)
+    this.setDepthToNodes(this.stack)
+    this.iterations = this.iterations + 1
     const popped = this.stack.pop()
     this.IDS(popped, finish)
   }
 
   @action
   IDS = (node, finish) => {
+    console.log('IDS', node)
     if (this.found) return
     if (this.nodes[node] == null) return
     if (!!this.nodes[node].visited) return
@@ -313,16 +438,23 @@ class Graph {
     if (this.depth < this.nodes[node].depth) {
       return alert(`No se encontro en el nivel ${this.depth}`)
     }
+
     const relations = _.difference(
-      _.difference(this.nodes[node].relations, this.stack),
+      _.difference(
+        _.map(this.nodes[node].relations, (r, k) => r.name),
+        this.stack
+      ),
       this.visited
     )
 
     this.setDepthToNodes(relations)
-
     this.stack = [...this.stack, ...relations]
+
+    if (!this.nodes[node].depth) {
+      this.iterations = this.iterations + 1
+    }
+
     const popped = this.stack.pop()
-    this.iterations = this.iterations + 1
     this.IDS(popped, finish)
   }
 
@@ -333,6 +465,45 @@ class Graph {
     })
 
     this.nodes = { ...this.nodes }
+  }
+
+  @action
+  initUCS = (start, finish) => {
+    this.initSearch()
+    this.stack.push(start)
+    const shifted = this.stack.shift()
+    this.UCS(shifted, finish)
+  }
+
+  @action
+  UCS = (node, finish) => {
+    if (this.found) return
+    if (this.nodes[node] == null) return
+    if (!!this.nodes[node].visited) return
+    this.setVisited(node)
+    if (node == finish) {
+      this.found = true
+      return alert(`Encontrado ${node}`)
+    }
+    const relations = _.difference(
+      _.difference(
+        _.map(
+          _.sortBy(this.nodes[node].relations, r => r.cost),
+          (r, k) => r.name
+        ),
+        this.stack
+      ),
+      this.visited
+    )
+
+    console.log(
+      { relations },
+      _.sortBy(this.nodes[node].relations, r => r.cost)
+    )
+
+    this.stack = [...this.stack, ...relations]
+    const shifted = this.stack.shift()
+    this.UCS(shifted, finish)
   }
 
   @action
@@ -349,6 +520,20 @@ class Graph {
     this.depth = level
   }
 
+  @action
+  initSearch = () => {
+    const cleared = _.mapValues(this.nodes, (node, key) => {
+      return { ...node, visited: false, searchIndex: '', depth: 0 }
+    })
+    this.nodes = cleared
+    this.queue = []
+    this.stack = []
+    this.visited = []
+    this.found = false
+    this.iterations = 0
+
+    this.nodes = { ...this.nodes }
+  }
   @action
   clearNavigation = () => {
     const cleared = _.mapValues(this.nodes, (node, key) => {
@@ -369,6 +554,7 @@ class Graph {
 
 @observer
 class App extends Component {
+  state = { depthColors: [] }
   constructor() {
     super()
     this.graph = new Graph()
@@ -405,6 +591,15 @@ class App extends Component {
   handleDepthLevelChange = e => {
     const level = e.target.value
     this.graph.setDepthLevel(level)
+    this.setState(
+      prevState => ({
+        depthColors: new Array(level)
+      }),
+      () => {
+        this.state.depthColors.map(() => getRandomColor())
+        this.setState()
+      }
+    )
   }
 
   handleBFSClick = () => {
@@ -433,8 +628,17 @@ class App extends Component {
       console.log({ search })
     }
   }
+  handleUCSClick = () => {
+    if (!this.to || !this.from) {
+      alert('Selecciona de donde a donde quieres ir.')
+    } else {
+      const search = this.graph.initUCS(this.from, this.to)
+      console.log({ search })
+    }
+  }
 
   render() {
+    const { depthColors } = this.state
     return (
       <Container>
         <div>
@@ -454,6 +658,7 @@ class App extends Component {
                 >
                   {key}
                   <SearchIndex>{node.searchIndex}</SearchIndex>
+                  {!!node.depth && <DepthLevel>{node.depth}</DepthLevel>}
                 </Building>
               )
             })}
@@ -479,6 +684,9 @@ class App extends Component {
             <Button onClick={this.handleBFSClick}>Busqueda por amplitud</Button>
             <Button onClick={this.handleDFSClick}>
               Busqueda por profundidad
+            </Button>
+            <Button onClick={this.handleUCSClick}>
+              Busqueda por costo uniforme
             </Button>
           </Row>
           <Row>
@@ -591,6 +799,14 @@ const Button = styled.button`
 
 const SearchIndex = styled.div`
   color: black;
+  font-size: 10px;
+`
+
+const DepthLevel = styled.div`
+  position: absolute;
+  background: red;
+  color: black;
+  bottom: 0;
   font-size: 10px;
 `
 
