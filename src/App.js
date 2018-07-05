@@ -6,10 +6,21 @@ import _ from 'lodash'
 import map from './assets/map.png'
 import './App.css'
 
-function getRandomColor() {
-  var letters = '0123456789ABCDEF'
-  var color = '#'
-  for (var i = 0; i < 6; i++) {
+const getDistance = (startCoords, finishCoords) => {
+  const { x: x1, y: y1 } = startCoords
+  const { x: x2, y: y2 } = finishCoords
+  console.log({ startCoords, finishCoords })
+  return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2))
+}
+
+const getArea = (width, height) => {
+  return width * height
+}
+
+const getRandomColor = () => {
+  let letters = '0123456789ABCDEF'
+  let color = '#'
+  for (let i = 0; i < 6; i++) {
     color += letters[Math.floor(Math.random() * 16)]
   }
   return color
@@ -17,6 +28,7 @@ function getRandomColor() {
 
 class Graph {
   @observable currentNodeKey = ''
+  @observable totalCost = 0
 
   queue = []
   stack = []
@@ -31,7 +43,9 @@ class Graph {
       isEntrance: true,
       measure: {
         top: 511,
-        left: 75
+        left: 75,
+        width: 50,
+        height: 50
       },
       relations: [
         { name: 'E2', cost: 2 },
@@ -44,7 +58,9 @@ class Graph {
       isEntrance: true,
       measure: {
         top: 490,
-        left: 207
+        left: 207,
+        width: 50,
+        height: 50
       },
       relations: [
         { name: 'E1', cost: 2 },
@@ -58,7 +74,9 @@ class Graph {
       isEntrance: true,
       measure: {
         left: 672,
-        top: 492
+        top: 492,
+        width: 50,
+        height: 50
       },
       relations: [
         { name: 'E1', cost: 5 },
@@ -311,17 +329,15 @@ class Graph {
     this.currentNodeKey = key
     this.clearSearch()
     const updated = _.mapValues(this.nodes, (node, key) => {
-      const found = _.map(this.currentNode.relations, (r, k) => r.name).filter(
-        relation => relation == key
-      ).length
+      const found = _
+        .map(this.currentNode.relations, (r, k) => r.name)
+        .filter(relation => relation == key).length
       if (!!found) {
         return { ...node, collides: true }
       } else {
         return { ...node, collides: false }
       }
     })
-    console.log({ updated })
-
     this.nodes = { ...updated }
   }
 
@@ -359,12 +375,6 @@ class Graph {
 
   @action
   DFS = (node, finish) => {
-    console.log('DFS', {
-      name: node,
-      found: this.found,
-      node: this.nodes[node]
-      // visited: this.nodes[node].visited
-    })
     if (this.found) return
     if (this.nodes[node] == null) return
     if (!!this.nodes[node].visited) return
@@ -384,6 +394,211 @@ class Graph {
     this.stack = [...this.stack, ...relations]
     const popped = this.stack.pop()
     this.DFS(popped, finish)
+  }
+
+  @action
+  initBestFirst = (start, finish) => {
+    this.initSearch()
+    this.bestFirst(start, finish)
+  }
+
+  @action
+  initBestFirst2 = (start, finish) => {
+    this.initSearch()
+    this.bestFirst2(start, finish)
+  }
+
+  @action
+  bestFirst = (start, finish) => {
+    if (this.found) return
+    if (this.nodes[start] == null) return
+    if (!!this.nodes[start].visited) return
+    this.setVisited(start)
+    if (start == finish) {
+      this.found = true
+      return alert(`Encontrado ${start}`)
+    }
+    const relations = this.nodes[start].relations
+    const finishNode = this.nodes[finish]
+    const finishCoords = {
+      x: finishNode.measure.left,
+      y: finishNode.measure.top
+    }
+    const withDistance = relations.map(relation => {
+      const relationNode = this.nodes[relation.name]
+      console.log({ relationNode, finishNode })
+      const relationCoords = {
+        x: relationNode.measure.left,
+        y: relationNode.measure.top
+      }
+      return {
+        index: relation.name,
+        distance: getDistance(relationCoords, finishCoords)
+      }
+    })
+
+    const nearest = withDistance.reduce((prev, current) => {
+      if (prev.distance > current.distance) return current
+      return prev
+    })
+
+    console.log(start, { withDistance, nearest })
+
+    this.bestFirst(nearest.index, finish)
+  }
+
+  @action
+  bestFirst2 = (start, finish) => {
+    if (this.found) return
+    if (this.nodes[start] == null) return
+    if (!!this.nodes[start].visited) return
+    this.setVisited(start)
+    if (start == finish) {
+      this.found = true
+      return alert(`Encontrado ${start}`)
+    }
+    const relations = this.nodes[start].relations.filter(relation => {
+      return !this.nodes[relation.name].visited
+    })
+    const finishNode = this.nodes[finish]
+    const finishCoords = {
+      x: finishNode.measure.width,
+      y: finishNode.measure.height
+    }
+    const withArea = relations.map(relation => {
+      const relationNode = this.nodes[relation.name]
+      console.log({ relationNode, finishNode })
+      return {
+        index: relation.name,
+        area: getArea(relationNode.measure.width, relationNode.measure.height)
+      }
+    })
+
+    const nearest = withArea.reduce(
+      (prev, current) => {
+        if (prev.area < current.area) return current
+        return prev
+      },
+      {
+        area: 0
+      }
+    )
+
+    console.log(start, { withArea, nearest })
+
+    this.bestFirst2(nearest.index, finish)
+  }
+
+  @action
+  initMountainPath = (start, finish) => {
+    this.initSearch()
+    this.mountainPath(start, finish)
+  }
+
+  @action
+  mountainPath = (start, finish) => {
+    if (this.found) return
+    if (this.nodes[start] == null) return
+    if (!!this.nodes[start].visited) return
+    this.setVisited(start)
+    if (start == finish) {
+      this.found = true
+      return alert(`Encontrado ${start}`)
+    }
+    const startNode = this.nodes[start]
+    const relations = startNode.relations
+    const startCoords = {
+      x: startNode.measure.left,
+      y: startNode.measure.top
+    }
+    const withDistance = relations.map(relation => {
+      const relationNode = this.nodes[relation.name]
+      console.log({ relationNode, startNode })
+      const relationCoords = {
+        x: relationNode.measure.left,
+        y: relationNode.measure.top
+      }
+      return {
+        visited: relationNode.visited,
+        index: relation.name,
+        distance: getDistance(startCoords, relationCoords)
+      }
+    })
+
+    const nearest = withDistance.filter(r => !r.visited).reduce(
+      (prev, current) => {
+        if (prev.distance > current.distance) return current
+        return prev
+      },
+      {
+        distance: 99999999
+      }
+    )
+
+    console.log(start, { withDistance, nearest })
+
+    this.mountainPath(nearest.index, finish)
+  }
+
+  @action
+  initAStar = (start, finish) => {
+    this.initSearch()
+    this.aStar(start, finish)
+  }
+
+  @action
+  aStar = (start, finish) => {
+    if (this.found) return
+    if (this.nodes[start] == null) return
+    if (!!this.nodes[start].visited) return
+    this.setVisited(start)
+    if (start == finish) {
+      this.found = true
+      return alert(`Encontrado ${start}`)
+    }
+    const startNode = this.nodes[start]
+    const relations = startNode.relations
+    const startCoords = {
+      x: startNode.measure.left,
+      y: startNode.measure.top
+    }
+
+    const finishNode = this.nodes[finish]
+    const finishCoords = {
+      x: finishNode.measure.left,
+      y: finishNode.measure.top
+    }
+
+    const withDistance = relations.map(relation => {
+      const relationNode = this.nodes[relation.name]
+      console.log({ relationNode, startNode })
+      const relationCoords = {
+        x: relationNode.measure.left,
+        y: relationNode.measure.top
+      }
+
+      const distanceToFinish = getDistance(relationCoords, finishCoords)
+      const distanceFromStart = getDistance(startCoords, relationCoords)
+
+      const distance = distanceToFinish + distanceFromStart
+
+      return {
+        visited: relationNode.visited,
+        index: relation.name,
+        distance
+      }
+    })
+
+    const nearest = withDistance
+      .filter(r => !r.visited)
+      .reduce((prev, current) => {
+        if (prev.distance > current.distance) return current
+        return prev
+      })
+
+    console.log(start, { withDistance, nearest })
+
+    this.aStar(nearest.index, finish)
   }
 
   @action
@@ -496,11 +711,6 @@ class Graph {
       this.visited
     )
 
-    console.log(
-      { relations },
-      _.sortBy(this.nodes[node].relations, r => r.cost)
-    )
-
     this.stack = [...this.stack, ...relations]
     const shifted = this.stack.shift()
     this.UCS(shifted, finish)
@@ -574,6 +784,7 @@ class App extends Component {
       }
     }
   }
+
   handleFromChange = e => {
     const value = e.target.value
     this.graph.clearNavigation()
@@ -633,6 +844,40 @@ class App extends Component {
       alert('Selecciona de donde a donde quieres ir.')
     } else {
       const search = this.graph.initUCS(this.from, this.to)
+      console.log({ search })
+    }
+  }
+
+  handleBestFirstClick = () => {
+    if (!this.to || !this.from) {
+      alert('Selecciona de donde a donde quieres ir.')
+    } else {
+      const search = this.graph.initBestFirst(this.from, this.to)
+      console.log({ search })
+    }
+  }
+  handleBestFirst2Click = () => {
+    if (!this.to || !this.from) {
+      alert('Selecciona de donde a donde quieres ir.')
+    } else {
+      const search = this.graph.initBestFirst2(this.from, this.to)
+      console.log({ search })
+    }
+  }
+  handleMountainPath = () => {
+    if (!this.to || !this.from) {
+      alert('Selecciona de donde a donde quieres ir.')
+    } else {
+      const search = this.graph.initMountainPath(this.from, this.to)
+      console.log({ search })
+    }
+  }
+
+  handleAStar = () => {
+    if (!this.to || !this.from) {
+      alert('Selecciona de donde a donde quieres ir.')
+    } else {
+      const search = this.graph.initAStar(this.from, this.to)
       console.log({ search })
     }
   }
@@ -698,6 +943,16 @@ class App extends Component {
             <Button onClick={this.handleIDSClick}>
               Busqueda por profundidad iterativa
             </Button>
+          </Row>
+          <Row>
+            <Button onClick={this.handleBestFirstClick}>
+              Busqueda primero el mejor (Distancia)
+            </Button>
+            <Button onClick={this.handleBestFirst2Click}>
+              Busqueda primero el mejor (Sombra)
+            </Button>
+            <Button onClick={this.handleMountainPath}>Montaña</Button>
+            <Button onClick={this.handleAStar}>A*</Button>
           </Row>
         </div>
       </Container>
